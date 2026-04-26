@@ -79,7 +79,7 @@ void Board::attackMinionWithMinion(int attackerSide, int attackerIdx, int target
 
 void Board::attackPlayerWithMinion(int attackerSide, int attackerIdx, Player& targetPlayer) {
     Adept* attacker = getMinion(attackerSide, attackerIdx);
-    std::cout << "  " << attacker->getName() << " ataca hero-ul "
+    std::cout << "  " << attacker->getName() << " ataca player-ul "
               << targetPlayer.getName() << " pentru " << attacker->getAttack() << " damage!\n";
     targetPlayer.takeDamage(attacker->getAttack());
 }
@@ -89,9 +89,9 @@ void Board::printSeparator(int width) const {
     std::cout << "\n";
 }
 
-void Board::display(const Player& hero0, const Player& hero1) const {
+void Board::display(const Player& player0, const Player& player1) const {
     printSeparator(60);
-    std::cout << "  " << hero1.getName() << " | HP: " << hero1.getHealth() << "/" << hero1.getMaxHealth() << "\n";
+    std::cout << "  " << player1.getName() << " | HP: " << player1.getHealth() << "/" << player1.getMaxHealth() << "\n";
     std::cout << "  Tabla adversar: ";
     if (minions[1].empty()) std::cout << "(gol)";
     for (const Adept* a : minions[1])
@@ -103,7 +103,7 @@ void Board::display(const Player& hero0, const Player& hero1) const {
     for (const Adept* a : minions[0])
         std::cout << "[" << a->getName() << " " << a->getAttack() << "/" << a->getCurrentHealth() << "] ";
     std::cout << "\n";
-    std::cout << "  " << hero0.getName() << " | HP: " << hero0.getHealth() << "/" << hero0.getMaxHealth() << "\n";
+    std::cout << "  " << player0.getName() << " | HP: " << player0.getHealth() << "/" << player0.getMaxHealth() << "\n";
     printSeparator(60);
 }
 
