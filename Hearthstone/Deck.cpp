@@ -82,8 +82,8 @@ void Deck::saveToFile(const std::string& filename) const {
         } else if (c->getType() == "Spell") {
             const Spell* s = dynamic_cast<const Spell*>(c);
             out << spellEffectToString(s->getEffect()) << "\n" << s->getValue() << "\n";
-        } else if (c->getType() == "Champion") {
-            const Champion* ch = dynamic_cast<const Champion*>(c);
+        } else if (c->getType() == "Legend") {
+            const Legend* ch = dynamic_cast<const Legend*>(c);
             out << ch->getAttack() << "\n" << ch->getMaxHealth() << "\n";
             out << spellEffectToString(ch->getEffect()) << "\n" << ch->getValue() << "\n";
             out << ch->getTitle() << "\n";
@@ -117,7 +117,7 @@ void Deck::loadFromFile(const std::string& filename) {
             in >> val;
             in.ignore();
             cards.push_back(new Spell(name, cost, spellEffectFromString(effStr), val));
-        } else if (type == "Champion") {
+        } else if (type == "Legend") {
             int atk, hp;
             in >> atk >> hp;
             in.ignore();
@@ -126,7 +126,7 @@ void Deck::loadFromFile(const std::string& filename) {
             in.ignore();
             std::string ttl;
             std::getline(in, ttl);
-            cards.push_back(new Champion(name, cost, atk, hp, spellEffectFromString(effStr), val, ttl));
+            cards.push_back(new Legend(name, cost, atk, hp, spellEffectFromString(effStr), val, ttl));
         }
     }
 }
