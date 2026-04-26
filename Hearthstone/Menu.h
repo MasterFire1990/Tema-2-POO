@@ -14,7 +14,6 @@ class Menu {
     void clearUsers();
     void copyUsers(const std::vector<User*>& src);
 
-    void printBanner() const;
     void printSeparator() const;
 
     
