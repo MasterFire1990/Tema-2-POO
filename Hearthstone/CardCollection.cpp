@@ -33,7 +33,6 @@ CardCollection::~CardCollection() { clearCards(); }
 void CardCollection::loadFromFiles(const std::string& dataFolder) {
     clearCards();
 
-    
     std::ifstream fa(dataFolder + "/adepts.txt");
     if (fa) {
         int count; fa >> count; fa.ignore();
@@ -45,7 +44,6 @@ void CardCollection::loadFromFiles(const std::string& dataFolder) {
         }
     }
 
-    
     std::ifstream fs(dataFolder + "/spells.txt");
     if (fs) {
         int count; fs >> count; fs.ignore();
@@ -59,7 +57,6 @@ void CardCollection::loadFromFiles(const std::string& dataFolder) {
         }
     }
 
-    
     std::ifstream fc(dataFolder + "/legends.txt");
     if (fc) {
         int count; fc >> count; fc.ignore();
@@ -79,7 +76,7 @@ void CardCollection::saveToFiles(const std::string& dataFolder) const {
     std::filesystem::create_directories(dataFolder);
     std::ofstream fa(dataFolder + "/adepts.txt");
     std::ofstream fs(dataFolder + "/spells.txt");
-    std::ofstream fc(dataFolder + "/champions.txt");
+    std::ofstream fc(dataFolder + "/legends.txt");
 
     int ca = 0, cs = 0, cc = 0;
     for (Card* c : cards) {
@@ -125,7 +122,7 @@ Card* CardCollection::findByName(const std::string& name) const {
 void CardCollection::addCard(Card* card) {
     if (findByName(card->getName()) != nullptr)
         throw std::runtime_error("Card already exists: " + card->getName());
-    cards.push_back(card);
+    cards.push_back(card->clone());
 }
 
 void CardCollection::removeCard(int index) {
@@ -143,7 +140,6 @@ std::ostream& operator<<(std::ostream& os, const CardCollection& col) {
 }
 
 std::istream& operator>>(std::istream& is, CardCollection& col) {
-    
     std::string type;
     std::cout << "Card type (Adept/Spell/Legend): ";
     is >> type;
@@ -165,6 +161,7 @@ std::istream& operator>>(std::istream& is, CardCollection& col) {
     }
     try {
         col.addCard(card);
+        delete card;
     } catch (...) {
         delete card;
         throw;
