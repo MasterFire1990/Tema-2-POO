@@ -2,7 +2,6 @@
 #include "../Hearthstone/Legend.h"
 #include <stdexcept>
 #include <iostream>
-#include <algorithm>
 
 void GameEngine::clearHands() {
     for (int s = 0; s < 2; s++) {
@@ -13,8 +12,8 @@ void GameEngine::clearHands() {
 
 void GameEngine::drawCard(int side) {
     if (decks[side]->isEmpty()) {
-        std::cout << "  [INFO] " << heroes[side]->getName() << " nu mai are carti in deck!\n";
-        heroes[side]->takeDamage(1);
+        std::cout << "  [INFO] " << players[side]->getName() << " nu mai are carti in deck!\n";
+        players[side]->takeDamage(1);
         return;
     }
     if (static_cast<int>(hands[side].size()) >= MAX_HAND_SIZE) {
@@ -64,8 +63,8 @@ void GameEngine::applyDamageSpell(int casterSide, int value) {
     int choice;
     std::cin >> choice;
     if (choice == 0) {
-        heroes[enemySide]->takeDamage(value);
-        std::cout << "  " << heroes[enemySide]->getName() << " primeste " << value << " damage!\n";
+        players[enemySide]->takeDamage(value);
+        std::cout << "  " << players[enemySide]->getName() << " primeste " << value << " damage!\n";
     } else {
         int idx = choice - 1;
         if (idx >= 0 && idx < board->getMinionCount(enemySide)) {
@@ -86,7 +85,7 @@ void GameEngine::applyHealSpell(int casterSide, int value) {
     int choice;
     std::cin >> choice;
     if (choice == 0) {
-        heroes[casterSide]->heal(value);
+        players[casterSide]->heal(value);
         std::cout << "  Player healed!\n";
     } else {
         int idx = choice - 1;
@@ -119,7 +118,7 @@ void GameEngine::printHeader() const {
 }
 
 void GameEngine::printHand(int side) const {
-    std::cout << "  Mana in mana (" << hands[side].size() << " carti):\n";
+    std::cout << "  Carti in mana (" << hands[side].size() << " carti):\n";
     for (int i = 0; i < static_cast<int>(hands[side].size()); i++)
         std::cout << "    [" << i << "] " << *hands[side][i] << "\n";
 }
@@ -131,7 +130,7 @@ void GameEngine::printMana(int side) const {
 GameEngine::GameEngine()
     : board(nullptr), currentTurn(0), gameOver(false), winner(-1) {
     for (int s = 0; s < 2; s++) {
-        heroes[s] = nullptr;
+        players[s] = nullptr;
         decks[s] = nullptr;
         currentMana[s] = 0;
         maxMana[s] = 0;
@@ -140,8 +139,8 @@ GameEngine::GameEngine()
 
 GameEngine::GameEngine(User* user0, Deck* deck0, User* user1, Deck* deck1)
     : currentTurn(0), gameOver(false), winner(-1) {
-    heroes[0] = new Player(user0->getUsername());
-    heroes[1] = new Player(user1->getUsername());
+    players[0] = new Player(user0->getUsername());
+    players[1] = new Player(user1->getUsername());
     decks[0] = new Deck(*deck0);
     decks[1] = new Deck(*deck1);
     decks[0]->shuffle();
@@ -154,8 +153,8 @@ GameEngine::GameEngine(User* user0, Deck* deck0, User* user1, Deck* deck1)
 GameEngine::GameEngine(const GameEngine& other)
     : currentTurn(other.currentTurn), gameOver(other.gameOver), winner(other.winner) {
     for (int s = 0; s < 2; s++) {
-        heroes[s] = new Player(*other.heroes[s]);
-        decks[s]  = new Deck(*other.decks[s]);
+        players[s] = new Player(*other.players[s]);
+        decks[s]   = new Deck(*other.decks[s]);
         currentMana[s] = other.currentMana[s];
         maxMana[s]     = other.maxMana[s];
         for (Card* c : other.hands[s]) hands[s].push_back(c->clone());
@@ -167,9 +166,9 @@ GameEngine& GameEngine::operator=(const GameEngine& other) {
     if (this != &other) {
         clearHands();
         for (int s = 0; s < 2; s++) {
-            delete heroes[s]; delete decks[s];
-            heroes[s] = new Player(*other.heroes[s]);
-            decks[s]  = new Deck(*other.decks[s]);
+            delete players[s]; delete decks[s];
+            players[s] = new Player(*other.players[s]);
+            decks[s]   = new Deck(*other.decks[s]);
             currentMana[s] = other.currentMana[s];
             maxMana[s]     = other.maxMana[s];
             for (Card* c : other.hands[s]) hands[s].push_back(c->clone());
@@ -185,7 +184,7 @@ GameEngine& GameEngine::operator=(const GameEngine& other) {
 
 GameEngine::~GameEngine() {
     clearHands();
-    for (int s = 0; s < 2; s++) { delete heroes[s]; delete decks[s]; }
+    for (int s = 0; s < 2; s++) { delete players[s]; delete decks[s]; }
     delete board;
 }
 
@@ -212,9 +211,9 @@ void GameEngine::processTurn() {
         if (gameOver) break;
 
         printHeader();
-        board->display(*heroes[0], *heroes[1]);
+        board->display(*players[0], *players[1]);
         printMana(side);
-        std::cout << heroes[side]->getName() << " joaca.\n";
+        std::cout << players[side]->getName() << " joaca.\n";
         printHand(side);
 
         bool turnEnded = false;
@@ -258,8 +257,8 @@ void GameEngine::processTurn() {
                     turnEnded = true;
                     break;
                 case 0:
-                    std::cout << "  " << heroes[side]->getName() << " a abandonat!\n";
-                    winner  = 1 - side;
+                    std::cout << "  " << players[side]->getName() << " a abandonat!\n";
+                    winner   = 1 - side;
                     gameOver = true;
                     turnEnded = true;
                     break;
@@ -271,8 +270,8 @@ void GameEngine::processTurn() {
     }
     std::cout << "\n\xC9\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xBB\n";
     if (winner >= 0)
-        std::cout << "\xBA  CASTIGATOR: " << heroes[winner]->getName()
-                  << std::string(39 - heroes[winner]->getName().size(), ' ') << "\xBA\n";
+        std::cout << "\xBA  CASTIGATOR: " << players[winner]->getName()
+                  << std::string(39 - players[winner]->getName().size(), ' ') << "\xBA\n";
     else
         std::cout << "\xBA  Egalitate!                                          \xBA\n";
     std::cout << "\xC8\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xBC\n";
@@ -305,7 +304,7 @@ void GameEngine::playCardFromHand(int side, int handIndex) {
 
 void GameEngine::attackWithMinion(int side, int minionIndex, int targetIndex, bool targetPlayer) {
     if (targetPlayer)
-        board->attackPlayerWithMinion(side, minionIndex, *heroes[1 - side]);
+        board->attackPlayerWithMinion(side, minionIndex, *players[1 - side]);
     else
         board->attackMinionWithMinion(side, minionIndex, targetIndex);
 }
@@ -315,11 +314,11 @@ void GameEngine::endTurn() {
 }
 
 void GameEngine::checkWinCondition() {
-    if (!heroes[0]->isAlive() && !heroes[1]->isAlive()) {
+    if (!players[0]->isAlive() && !players[1]->isAlive()) {
         gameOver = true; winner = -1;
-    } else if (!heroes[0]->isAlive()) {
+    } else if (!players[0]->isAlive()) {
         gameOver = true; winner = 1;
-    } else if (!heroes[1]->isAlive()) {
+    } else if (!players[1]->isAlive()) {
         gameOver = true; winner = 0;
     }
 }
@@ -327,8 +326,8 @@ void GameEngine::checkWinCondition() {
 std::ostream& operator<<(std::ostream& os, const GameEngine& ge) {
     os << "GameEngine | Tura: " << ge.currentTurn
        << " | GameOver: " << (ge.gameOver ? "DA" : "NU") << "\n";
-    if (ge.heroes[0]) os << "  P1: " << *ge.heroes[0] << "\n";
-    if (ge.heroes[1]) os << "  P2: " << *ge.heroes[1] << "\n";
+    if (ge.players[0]) os << "  P1: " << *ge.players[0] << "\n";
+    if (ge.players[1]) os << "  P2: " << *ge.players[1] << "\n";
     return os;
 }
 
