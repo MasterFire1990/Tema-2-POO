@@ -50,7 +50,6 @@ void Menu::printBanner() const {
     std::cout << "  ██\xC9\xCD\xCD██\xBA██\xC9\xCD\xCD\xBC  ██\xC9\xCD\xCD██\xBA██\xC9\xCD\xCD██\xBB   ██\xBA   ██\xC9\xCD\xCD██\xBA\xC8\xCD\xCD\xCD\xCD██\xBA   ██\xBA   ██\xBA   ██\xBA██\xBA\xC8████\xBA██\xC9\xCD\xCD\xBC  \n";
     std::cout << "  ██\xBA  ██\xBA███████\xBB██\xBA  ██\xBA██\xBA  ██\xBA   ██\xBA   ██\xBA  ██\xBA███████\xBA   ██\xBA   \xC8██████\xC9\xBC██\xBA \xC8███\xBA███████\xBB\n";
     std::cout << "  \xC8\xCD\xBC  \xC8\xCD\xBC\xC8\xCD\xCD\xCD\xCD\xCD\xCD\xBC\xC8\xCD\xBC  \xC8\xCD\xBC\xC8\xCD\xBC  \xC8\xCD\xBC   \xC8\xCD\xBC   \xC8\xCD\xBC  \xC8\xCD\xBC\xC8\xCD\xCD\xCD\xCD\xCD\xCD\xBC   \xC8\xCD\xBC    \xC8\xCD\xCD\xCD\xCD\xCD\xBC \xC8\xCD\xBC  \xC8\xCD\xCD\xBC\xC8\xCD\xCD\xCD\xCD\xCD\xCD\xBC\n";
-    std::cout << "                                   [ ASCII Edition ]\n";
 }
 
 void Menu::printSeparator() const {
@@ -140,13 +139,13 @@ void Menu::menuAddCard() {
             std::cout << "  [ERR] Tip invalid.\n"; return;
         }
         collection.addCard(card);
+        delete card;
         collection.saveToFiles(DATA_FOLDER);
         std::cout << "  [OK] Carta adaugata.\n";
     } catch (const std::exception& e) {
         delete card;
         std::cout << "  [ERR] " << e.what() << "\n";
     }
-    delete card;
 }
 
 void Menu::menuRemoveCard() {

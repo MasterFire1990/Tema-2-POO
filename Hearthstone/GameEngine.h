@@ -9,7 +9,7 @@
 #include <string>
 
 class GameEngine {
-    Player* heroes[2];
+    Player* players[2];
     Deck* decks[2];
     std::vector<Card*> hands[2];
     Board* board;
@@ -50,7 +50,7 @@ public:
     void startGame();
     void processTurn();
     void playCardFromHand(int side, int handIndex);
-    void attackWithMinion(int side, int minionIndex, int targetIndex, bool targetHero);
+    void attackWithMinion(int side, int minionIndex, int targetIndex, bool targetPlayer);
     void endTurn();
     void checkWinCondition();
 
