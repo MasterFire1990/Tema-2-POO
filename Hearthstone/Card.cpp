@@ -7,11 +7,11 @@ void Card::setName(const std::string& n) {
 }
 
 void Card::setManaCost(int cost) {
-    if (cost < 0) throw std::invalid_argument("Mana cost cannot be negative");
+    if (cost < 1 || cost > 10) throw std::invalid_argument("Mana cost must be between 1 and 10");
     manaCost = cost;
 }
 
-Card::Card() : name("Unknown"), manaCost(0) {}
+Card::Card() : name("Unknown"), manaCost(1) {}
 
 Card::Card(const std::string& name, int manaCost) {
     setName(name);
@@ -41,7 +41,7 @@ void Card::read(std::istream& is) {
     std::string n;
     int cost;
     std::cout << "  Card name: ";
-    is >> n;
+    std::getline(is >> std::ws, n);
     std::cout << "  Mana cost: ";
     is >> cost;
     setName(n);

@@ -33,40 +33,55 @@ CardCollection::~CardCollection() { clearCards(); }
 void CardCollection::loadFromFiles(const std::string& dataFolder) {
     clearCards();
 
-    std::ifstream fa(dataFolder + "/adepts.txt");
+    auto openFile = [](std::ifstream& f, const std::string& dataFolder, const std::string& name) {
+        f.open(dataFolder + "/" + name);
+        if (!f) {
+            f.clear();
+            f.open(name);
+        }
+        if (!f) {
+            f.clear();
+            f.open("../" + name);
+        }
+    };
+
+    std::ifstream fa;
+    openFile(fa, dataFolder, "adepts.txt");
     if (fa) {
         int count; fa >> count; fa.ignore();
         for (int i = 0; i < count; i++) {
             std::string name; int cost, atk, hp;
-            std::getline(fa, name);
+            std::getline(fa >> std::ws, name);
             fa >> cost >> atk >> hp; fa.ignore();
             cards.push_back(new Adept(name, cost, atk, hp));
         }
     }
 
-    std::ifstream fs(dataFolder + "/spells.txt");
+    std::ifstream fs;
+    openFile(fs, dataFolder, "spells.txt");
     if (fs) {
         int count; fs >> count; fs.ignore();
         for (int i = 0; i < count; i++) {
             std::string name, effStr; int cost, val;
-            std::getline(fs, name);
+            std::getline(fs >> std::ws, name);
             fs >> cost; fs.ignore();
-            std::getline(fs, effStr);
+            std::getline(fs >> std::ws, effStr);
             fs >> val; fs.ignore();
             cards.push_back(new Spell(name, cost, spellEffectFromString(effStr), val));
         }
     }
 
-    std::ifstream fc(dataFolder + "/legends.txt");
+    std::ifstream fc;
+    openFile(fc, dataFolder, "legends.txt");
     if (fc) {
         int count; fc >> count; fc.ignore();
         for (int i = 0; i < count; i++) {
             std::string name, effStr, title; int cost, atk, hp, val;
-            std::getline(fc, name);
+            std::getline(fc >> std::ws, name);
             fc >> cost >> atk >> hp; fc.ignore();
-            std::getline(fc, effStr);
+            std::getline(fc >> std::ws, effStr);
             fc >> val; fc.ignore();
-            std::getline(fc, title);
+            std::getline(fc >> std::ws, title);
             cards.push_back(new Legend(name, cost, atk, hp, spellEffectFromString(effStr), val, title));
         }
     }

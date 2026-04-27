@@ -141,6 +141,6 @@ std::ostream& operator<<(std::ostream& os, const Deck& deck) {
 
 std::istream& operator>>(std::istream& is, Deck& deck) {
     std::cout << "Deck name: ";
-    is >> deck.deckName;
+    std::getline(is >> std::ws, deck.deckName);
     return is;
 }

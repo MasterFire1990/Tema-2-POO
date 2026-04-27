@@ -9,6 +9,15 @@
 #include <filesystem>
 #include <limits>
 
+static void cinClear() {
+    if (std::cin.eof()) {
+        std::cout << "\n  [INFO] EOF detected. Exiting...\n";
+        std::exit(0);
+    }
+    std::cin.clear();
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+}
+
 const std::string Menu::DATA_FOLDER = "data";
 const std::string Menu::USERS_FILE  = "data/users.txt";
 
@@ -51,7 +60,7 @@ void Menu::printSeparator() const {
 void Menu::menuAddUser() {
     std::cout << "\n  Nume utilizator nou: ";
     std::string name;
-    std::cin >> name;
+    std::getline(std::cin >> std::ws, name);
     for (User* u : users)
         if (u->getUsername() == name) {
             std::cout << "  [ERR] Utilizatorul exista deja.\n";
@@ -66,7 +75,9 @@ void Menu::menuRemoveUser() {
     if (users.empty()) { std::cout << "  [INFO] Nu exista utilizatori.\n"; return; }
     menuViewUsers();
     std::cout << "  Index utilizator de sters (0 = renunta): ";
-    int idx; std::cin >> idx;
+    int idx;
+    if (!(std::cin >> idx)) { cinClear(); std::cout << "  [ERR] Input invalid.\n"; return; }
+    cinClear();
     if (idx == 0) return;
     idx--;
     if (idx < 0 || idx >= static_cast<int>(users.size())) {
@@ -95,7 +106,11 @@ void Menu::menuUsers() {
         std::cout << "  [2] Sterge utilizator\n";
         std::cout << "  [3] Vizualizeaza utilizatori\n";
         std::cout << "  [0] Inapoi\n  > ";
-        std::cin >> opt;
+        if (!(std::cin >> opt)) {
+            cinClear();
+            continue;
+        }
+        cinClear();
         try {
             if (opt == 1) menuAddUser();
             else if (opt == 2) menuRemoveUser();
@@ -109,8 +124,10 @@ void Menu::menuUsers() {
 
 
 void Menu::menuAddCard() {
-    std::cout << "\n  Tip carta (1=Adept, 2=Spell, 3=Legend): ";
-    int type; std::cin >> type;
+    std::cout << "\n  Tip carte (1=Adept, 2=Spell, 3=Legend): ";
+    int type;
+    if (!(std::cin >> type)) { cinClear(); std::cout << "  [ERR] Input invalid.\n"; return; }
+    cinClear();
     Card* card = nullptr;
     try {
         if (type == 1) {
@@ -131,9 +148,11 @@ void Menu::menuAddCard() {
         collection.addCard(card);
         delete card;
         collection.saveToFiles(DATA_FOLDER);
-        std::cout << "  [OK] Carta adaugata.\n";
+        std::cout << "  [OK] Carte adaugata.\n";
     } catch (const std::exception& e) {
         delete card;
+        card = nullptr;
+        std::cin.clear();
         std::cout << "  [ERR] " << e.what() << "\n";
     }
 }
@@ -141,13 +160,15 @@ void Menu::menuAddCard() {
 void Menu::menuRemoveCard() {
     if (collection.getCount() == 0) { std::cout << "  [INFO] Nu exista carti.\n"; return; }
     std::cout << collection;
-    std::cout << "  Index carta de sters (0 = renunta): ";
-    int idx; std::cin >> idx;
+    std::cout << "  Index carte de sters (0 = renunta): ";
+    int idx;
+    if (!(std::cin >> idx)) { cinClear(); std::cout << "  [ERR] Input invalid.\n"; return; }
+    cinClear();
     if (idx == 0) return;
     try {
         collection.removeCard(idx - 1);
         collection.saveToFiles(DATA_FOLDER);
-        std::cout << "  [OK] Carta stearsa.\n";
+        std::cout << "  [OK] Carte stearsa.\n";
     } catch (const std::exception& e) {
         std::cout << "  [ERR] " << e.what() << "\n";
     }
@@ -162,11 +183,16 @@ void Menu::menuCards() {
     int opt;
     do {
         std::cout << "\n  === CARTI ===\n";
-        std::cout << "  [1] Adauga carta\n";
-        std::cout << "  [2] Sterge carta\n";
+        std::cout << "  [1] Adauga carte\n";
+        std::cout << "  [2] Sterge carte\n";
         std::cout << "  [3] Vizualizeaza toate cartile\n";
         std::cout << "  [0] Inapoi\n  > ";
-        std::cin >> opt;
+        if (!(std::cin >> opt)) {
+            cinClear();
+            opt = -1;
+            continue;
+        }
+        cinClear();
         try {
             if (opt == 1) menuAddCard();
             else if (opt == 2) menuRemoveCard();
@@ -192,7 +218,7 @@ void Menu::menuSelectUserForDeck(User*& selectedUser) {
 
 void Menu::menuCreateDeck(User* user) {
     std::cout << "  Nume deck nou: ";
-    std::string name; std::cin >> name;
+    std::string name; std::getline(std::cin >> std::ws, name);
     try {
         user->addDeck(name);
         saveAllUsers();
@@ -221,35 +247,46 @@ void Menu::menuBuildDeck(User* user) {
     if (user->getDeckCount() == 0) { std::cout << "  [INFO] Creeaza mai intai un deck.\n"; return; }
     menuViewDecks(user);
     std::cout << "  Selecteaza deck: ";
-    int didx; std::cin >> didx;
+    int didx;
+    if (!(std::cin >> didx)) { cinClear(); std::cout << "  [ERR] Input invalid.\n"; return; }
+    cinClear();
     if (didx < 1 || didx > user->getDeckCount()) { std::cout << "  [ERR] Index invalid.\n"; return; }
     Deck* deck = user->getDeck(didx - 1);
 
     int opt;
     do {
         std::cout << "\n  Deck: " << deck->getDeckName() << " (" << deck->getSize() << "/30)\n";
-        std::cout << "  [1] Adauga carta din colectie\n";
-        std::cout << "  [2] Sterge carta din deck\n";
+        std::cout << "  [1] Adauga carte din colectie\n";
+        std::cout << "  [2] Sterge carte din deck\n";
         std::cout << "  [3] Vizualizeaza deck\n";
         std::cout << "  [0] Salveaza si iesi\n  > ";
-        std::cin >> opt;
+        if (!(std::cin >> opt)) {
+            cinClear();
+            opt = -1;
+            continue;
+        }
+        cinClear();
         try {
             if (opt == 1) {
                 if (collection.getCount() == 0) { std::cout << "  [INFO] Colectia e goala.\n"; continue; }
                 std::cout << collection;
-                std::cout << "  Index carta de adaugat: ";
-                int cidx; std::cin >> cidx;
+                std::cout << "  Index carte de adaugat: ";
+                int cidx;
+                if (!(std::cin >> cidx)) { cinClear(); std::cout << "  [ERR] Input invalid.\n"; continue; }
+                cinClear();
                 deck->addCard(collection.getCard(cidx - 1));
                 saveAllUsers();
-                std::cout << "  [OK] Carta adaugata in deck.\n";
+                std::cout << "  [OK] Carte adaugata in deck.\n";
             } else if (opt == 2) {
                 if (deck->getSize() == 0) { std::cout << "  [INFO] Deck-ul e gol.\n"; continue; }
                 std::cout << *deck;
-                std::cout << "  Index carta de scos: ";
-                int ridx; std::cin >> ridx;
+                std::cout << "  Index carte de scos: ";
+                int ridx;
+                if (!(std::cin >> ridx)) { cinClear(); std::cout << "  [ERR] Input invalid.\n"; continue; }
+                cinClear();
                 deck->removeCard(ridx - 1);
                 saveAllUsers();
-                std::cout << "  [OK] Carta scoasa.\n";
+                std::cout << "  [OK] Carte scoasa.\n";
             } else if (opt == 3) {
                 std::cout << *deck;
             }
@@ -274,7 +311,12 @@ void Menu::menuDecks() {
         std::cout << "  [3] Editeaza deck\n";
         std::cout << "  [4] Vizualizeaza deck-uri utilizator\n";
         std::cout << "  [0] Inapoi\n  > ";
-        std::cin >> opt;
+        if (!(std::cin >> opt)) {
+            cinClear();
+            opt = -1;
+            continue;
+        }
+        cinClear();
         try {
             if (opt >= 1 && opt <= 4) {
                 User* user = nullptr;
@@ -375,6 +417,7 @@ void Menu::run() {
         printSeparator();
         std::cout << "  > ";
         if (!(std::cin >> opt)) {
+            if (std::cin.eof()) break;
             std::cin.clear();
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             continue;

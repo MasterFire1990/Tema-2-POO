@@ -18,7 +18,7 @@ void GameEngine::drawCard(int side) {
     }
     if (static_cast<int>(hands[side].size()) >= MAX_HAND_SIZE) {
         Card* burned = decks[side]->drawCard();
-        std::cout << "  [INFO] Mana plina! Carta " << burned->getName() << " a fost arsa.\n";
+        std::cout << "  [INFO] Mana plina! Carte " << burned->getName() << " a fost arsa.\n";
         delete burned;
         return;
     }
@@ -32,8 +32,7 @@ void GameEngine::dealStartingHands() {
 }
 
 void GameEngine::incrementMana(int side) {
-    if (maxMana[side] < 10) maxMana[side]++;
-    currentMana[side] = maxMana[side];
+    if (currentMana[side] < maxMana[side]) currentMana[side]++;
 }
 
 void GameEngine::restoreMana(int side) {
@@ -133,7 +132,7 @@ GameEngine::GameEngine()
         players[s] = nullptr;
         decks[s] = nullptr;
         currentMana[s] = 0;
-        maxMana[s] = 0;
+        maxMana[s] = 10;
     }
 }
 
@@ -146,7 +145,7 @@ GameEngine::GameEngine(User* user0, Deck* deck0, User* user1, Deck* deck1)
     decks[0]->shuffle();
     decks[1]->shuffle();
     currentMana[0] = 0; currentMana[1] = 0;
-    maxMana[0] = 0;     maxMana[1] = 0;
+    maxMana[0] = 10;    maxMana[1] = 10;
     board = new Board();
 }
 
@@ -218,13 +217,13 @@ void GameEngine::processTurn() {
 
         bool turnEnded = false;
         while (!turnEnded && !gameOver) {
-            std::cout << "\n  [1] Joaca o carta  [2] Ataca cu minion  [3] Termina tura  [0] Abandon\n";
+            std::cout << "\n  [1] Joaca o carte  [2] Ataca cu minion  [3] Termina tura  [0] Abandon\n";
             std::cout << "  > ";
             int opt; std::cin >> opt;
             switch (opt) {
                 case 1: {
                     printHand(side);
-                    std::cout << "  Index carta: ";
+                    std::cout << "  Index carte: ";
                     int idx; std::cin >> idx;
                     try { playCardFromHand(side, idx); }
                     catch (const std::exception& e) { std::cout << "  [ERR] " << e.what() << "\n"; }
@@ -279,11 +278,15 @@ void GameEngine::processTurn() {
 
 void GameEngine::playCardFromHand(int side, int handIndex) {
     if (handIndex < 0 || handIndex >= static_cast<int>(hands[side].size()))
-        throw std::out_of_range("Index carta invalid");
+        throw std::out_of_range("Index carte invalid");
     Card* card = hands[side][handIndex];
     if (card->getManaCost() > currentMana[side])
         throw std::runtime_error("Mana insuficienta! Cost: " + std::to_string(card->getManaCost())
                                  + ", ai: " + std::to_string(currentMana[side]));
+
+    if ((card->getType() == "Adept" || card->getType() == "Legend") && board->isFull(side)) {
+        throw std::runtime_error("Board plin pe partea ta (max 7)!");
+    }
 
     currentMana[side] -= card->getManaCost();
     card->play();

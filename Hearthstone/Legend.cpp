@@ -73,5 +73,5 @@ void Legend::read(std::istream& is) {
     setValue(v);
 
     std::cout << "  Title: ";
-    is >> title;
+    std::getline(is >> std::ws, title);
 }

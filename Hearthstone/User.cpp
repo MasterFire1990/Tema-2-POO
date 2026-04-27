@@ -111,7 +111,7 @@ std::ostream& operator<<(std::ostream& os, const User& user) {
 std::istream& operator>>(std::istream& is, User& user) {
     std::cout << "Username: ";
     std::string name;
-    is >> name;
+    std::getline(is >> std::ws, name);
     user.setUsername(name);
     return is;
 }

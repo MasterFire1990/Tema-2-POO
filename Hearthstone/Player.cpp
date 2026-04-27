@@ -53,6 +53,6 @@ std::ostream& operator<<(std::ostream& os, const Player& hero) {
 
 std::istream& operator>>(std::istream& is, Player& hero) {
     std::cout << "Player name: ";
-    is >> hero.name;
+    std::getline(is >> std::ws, hero.name);
     return is;
 }
